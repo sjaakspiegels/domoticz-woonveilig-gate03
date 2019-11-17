@@ -41,7 +41,6 @@ class BasePlugin:
  
     _authorization = ""
     connection = None
-    domoticz_connection = None
 
     def __init__(self):
         return
@@ -120,20 +119,10 @@ class BasePlugin:
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
-        self.domoticz_connection = Domoticz.Connection(
-            Name="Woonveilig",
-            Transport="TCP/IP",
-            Protocol="HTTP",
-            Address=Parameters["Address"],
-            Port=Parameters["Port"]
-        )
-        self.domoticz_connection.Connect()  
         self.connection = http.client.HTTPConnection(Parameters["Address"],port=Parameters["Port"])    
 
     def read_sensors(self):
         Domoticz.Debug("Read sensors")
-#        if (self.connection.Connected() == False):
-#            self.connect_to_adaptor()
 
         sensors = {}
         for i in range(3):
@@ -270,6 +259,6 @@ def UpdateDevice(Unit, nValue, sValue):
     if (Unit in Devices):
         if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue):
             Devices[Unit].Update(nValue=nValue, sValue=str(sValue))
-            Domoticz.Log("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
+            Domoticz.Debug("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
     return
 
