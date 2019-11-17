@@ -58,6 +58,8 @@ class BasePlugin:
                 
         #Add new devices
         for sensor in sensors:
+            Domoticz.Debug("======= Sensor =========")
+            Domoticz.Debug(sensor)
             sensor_data = sensors[sensor]
             if (int(sensor_data[self.UNIT_KEY]) not in Devices):
                 Domoticz.Debug("Try to add sensor " + sensor_data["name"])
