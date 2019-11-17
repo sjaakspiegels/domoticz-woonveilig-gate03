@@ -142,6 +142,7 @@ class BasePlugin:
 #        if (self.connection.Connected() == False):
 #            self.connect_to_adaptor()
 
+        sensors = {}
         for i in range(3):
             try:
                 self.connection.request("GET", self.SENSOR_URL, headers={'Authorization': "Basic " + self._authorization})
@@ -161,7 +162,11 @@ class BasePlugin:
 
         data = r1.read().decode("utf-8", "ignore")
         json = parse_to_json(data)
-        return json
+
+        for sensor in json:
+            sensors[sensor["id"]] = sensor
+
+        return sensors
 
         
     def read_panel_condition(self):
