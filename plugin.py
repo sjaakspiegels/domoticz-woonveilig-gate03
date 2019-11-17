@@ -100,8 +100,14 @@ class BasePlugin:
         sensors = self.read_sensors()
         
         for sensor in sensors:
+            Domoticz.Debug("======= Sensor =========")
+            Domoticz.Debug(str(sensor))
+            Domoticz.Debug("======= Data =========")
             sensor_data = sensors[sensor]
+            Domoticz.Debug(str(sensor_data))
+            Domoticz.Debug("======= Status =========")
             sensor_triggered = get_sensor_triggered(sensor_data)
+            Domoticz.Debug(str(sensor_triggered))
             if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)
             elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
@@ -155,7 +161,6 @@ class BasePlugin:
 
         data = r1.read().decode("utf-8", "ignore")
         json = parse_to_json(data)
-        Domoticz.Debug(str(json))
         return json
 
         
