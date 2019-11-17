@@ -136,6 +136,7 @@ class BasePlugin:
             try:
                 self.connection.request("GET", self.SENSOR_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
+                Domoticz.Debug("Response received")
             except:
                 Domoticz.Log("ERROR --> Connection problems check URL and port")
                 return
