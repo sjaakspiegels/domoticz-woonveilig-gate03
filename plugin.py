@@ -151,7 +151,7 @@ class BasePlugin:
 
         data = r1.read().decode("utf-8", "ignore")
         json = parse_to_json(data)
-        Domoticz.Debug(json)
+        Domoticz.Debug(str(json))
         return json
 
         
@@ -178,7 +178,7 @@ class BasePlugin:
 
         data = r1.read().decode("utf-8", "ignore")
         json = parse_to_json(data)
-        Domoticz.Debug(json)
+        Domoticz.Debug(str(json))
         return json
 
 global _plugin
