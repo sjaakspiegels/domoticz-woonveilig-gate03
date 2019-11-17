@@ -119,7 +119,7 @@ class BasePlugin:
         self.connection = Domoticz.Connection(
             Name="Woonveilig",
             Transport="TCP/IP",
-            Protocol="JSON",
+            Protocol="HTTP",
             Address=Parameters["Address"],
             Port=Parameters["Port"]
         )
