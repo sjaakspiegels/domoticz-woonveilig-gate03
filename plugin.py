@@ -41,7 +41,8 @@ class BasePlugin:
  
     _authorization = ""
     connection = None
-    
+    domoticz_connection = None
+
     def __init__(self):
         return
 
@@ -119,15 +120,15 @@ class BasePlugin:
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
-        self.connection = Domoticz.Connection(
+        self.domoticz_connection = Domoticz.Connection(
             Name="Woonveilig",
             Transport="TCP/IP",
             Protocol="HTTP",
             Address=Parameters["Address"],
             Port=Parameters["Port"]
         )
-        self.connection.Connect()  
-#        self.connection = http.client.HTTPConnection(Parameters["Address"],port=Parameters["Port"])    
+        self.domoticz_connection.Connect()  
+        self.connection = http.client.HTTPConnection(Parameters["Address"],port=Parameters["Port"])    
 
     def read_sensors(self):
         Domoticz.Debug("Read sensors")
@@ -139,7 +140,6 @@ class BasePlugin:
             try:
                 self.connection.request("GET", self.SENSOR_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
-                Domoticz.Debug("Response received")
             except:
                 Domoticz.Log("ERROR --> Connection problems check URL and port")
                 return
@@ -162,7 +162,6 @@ class BasePlugin:
 
         
     def read_panel_condition(self):
-        Domoticz.Debug("Read panel condition")
 #        if (self.connection.Connected() == False):
 #            self.connect_to_adaptor()
 
@@ -238,8 +237,6 @@ def DumpConfigToLog():
     return
 
 def get_sensor_triggered(sensor):
-    Domoticz.Debug("======= sensor trigger?? =======")
-    Domoticz.Debug(str(sensor))
     if sensor is not None:
         Domoticz.Debug("Device: " + sensor["name"] + " status = " + sensor["status"] )
         if sensor['status'].upper() == "DOOR OPEN":
@@ -252,7 +249,6 @@ def get_sensor_triggered(sensor):
 def get_panel_state(panel):
     if panel is not None:
         status = panel['updates']['mode_a1']
-        Domoticz.Debug("Panel status = " + status)
         return status.upper()
     else:
         return None
