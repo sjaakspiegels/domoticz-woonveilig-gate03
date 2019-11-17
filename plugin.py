@@ -128,8 +128,8 @@ class BasePlugin:
 
     def read_sensors(self):
         Domoticz.Debug("Read sensors")
-        if (self.connection.Connected() == False):
-            self.connect_to_adaptor()
+#        if (self.connection.Connected() == False):
+#            self.connect_to_adaptor()
 
         for i in range(3):
             try:
@@ -155,8 +155,8 @@ class BasePlugin:
         
     def read_panel_condition(self):
         Domoticz.Debug("Read panel condition")
-        if (self.connection.Connected() == False):
-            self.connect_to_adaptor()
+#        if (self.connection.Connected() == False):
+#            self.connect_to_adaptor()
 
         for i in range(3):
             try:
