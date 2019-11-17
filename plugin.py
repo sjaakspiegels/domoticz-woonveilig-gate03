@@ -58,18 +58,18 @@ class BasePlugin:
                 
         #Add new devices
         for sensor in sensors:
-            sensorData = sensors[sensor]
-            if (int(sensorData[self.UNIT_KEY]) not in Devices):
-    
-                if (sensorData[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
-                    Domoticz.Device(Name=sensorData["name"], TypeName="Switch", Switchtype=11, Unit=int(sensorData[self.UNIT_KEY])).Create()
-                elif (sensorData[self.TYPE_KEY] in self.TYPES_KEYPAD and 99 not in Devices):
+            sensor_data = sensors[sensor]
+            if (int(sensor_data[self.UNIT_KEY]) not in Devices):
+                Domoticz.Debug("Try to add sensor " + sensor_data["name"])
+                if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
+                    Domoticz.Device(Name=sensor_data["name"], TypeName="Switch", Switchtype=11, Unit=int(sensor_data[self.UNIT_KEY])).Create()
+                elif (sensor_data[self.TYPE_KEY] in self.TYPES_KEYPAD and 99 not in Devices):
                     Options = {"LevelActions": "||","LevelNames": "Off|Home|On","LevelOffHidden": "false","SelectorStyle": "1"}
-                    Domoticz.Device(Name=sensorData["name"], Unit=99, TypeName="Selector Switch", Switchtype=18, Image=13, Options=Options).Create()
-                elif (sensorData[self.TYPE_KEY] in self.TYPES_IR): 
-                    Domoticz.Device(Name=sensorData["name"], TypeName="Switch", Switchtype=8, Unit=int(sensorData[self.UNIT_KEY])).Create()
+                    Domoticz.Device(Name=sensor_data["name"], Unit=99, TypeName="Selector Switch", Switchtype=18, Image=13, Options=Options).Create()
+                elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
+                    Domoticz.Device(Name=sensor_data["name"], TypeName="Switch", Switchtype=8, Unit=int(sensor_data[self.UNIT_KEY])).Create()
                 else:
-                    Domoticz.Debug("Device " + sensorData["name"] + " is not added to devices")
+                    Domoticz.Debug("Device " + sensor_data["name"] + " is not added to devices")
 
     def onStop(self):
         Domoticz.Debug("onStop called")
