@@ -163,7 +163,9 @@ class BasePlugin:
         data = r1.read().decode("utf-8", "ignore")
         json = parse_to_json(data)
 
-        for sensor in json:
+        for sensor in json["senrows"]:
+            Domoticz.Debug("====== Sensor ======")
+            Domoticz.Debug(str(sensor))
             sensors[sensor["id"]] = sensor
 
         return sensors
