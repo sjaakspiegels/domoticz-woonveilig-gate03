@@ -116,14 +116,15 @@ class BasePlugin:
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
-        self.connection = Domoticz.Connection(
-            Name="Woonveilig",
-            Transport="TCP/IP",
-            Protocol="HTTP",
-            Address=Parameters["Address"],
-            Port=Parameters["Port"]
-        )
-        self.connection.Connect()      
+#        self.connection = Domoticz.Connection(
+#            Name="Woonveilig",
+#            Transport="TCP/IP",
+#            Protocol="HTTP",
+#            Address=Parameters["Address"],
+#            Port=Parameters["Port"]
+#        )
+#        self.connection.Connect()  
+        self.connection = http.client.HTTPConnection(Parameters["Address"],port=Parameters["Port"])    
 
     def read_sensors(self):
         Domoticz.Debug("Read sensors")
