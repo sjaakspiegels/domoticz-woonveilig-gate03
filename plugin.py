@@ -58,13 +58,9 @@ class BasePlugin:
                 
         #Add new devices
         for sensor in sensors:
-            Domoticz.Debug("======= Sensor =========")
-            Domoticz.Debug(str(sensor))
-            Domoticz.Debug("======= Data =========")
             sensor_data = sensors[sensor]
-            Domoticz.Debug(str(sensor_data))
             if (int(sensor_data[self.UNIT_KEY]) not in Devices):
-                Domoticz.Debug("Try to add sensor " + sensor_data["name"])
+                Domoticz.Log("Try to add sensor " + sensor_data["name"])
                 if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
                     Domoticz.Device(Name=sensor_data["name"], TypeName="Switch", Switchtype=11, Unit=int(sensor_data[self.UNIT_KEY])).Create()
                 elif (sensor_data[self.TYPE_KEY] in self.TYPES_KEYPAD and 99 not in Devices):
@@ -73,7 +69,7 @@ class BasePlugin:
                 elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
                     Domoticz.Device(Name=sensor_data["name"], TypeName="Switch", Switchtype=8, Unit=int(sensor_data[self.UNIT_KEY])).Create()
                 else:
-                    Domoticz.Debug("Device " + sensor_data["name"] + " is not added to devices")
+                    Domoticz.Log("Device " + sensor_data["name"] + " is not added to devices")
 
     def onStop(self):
         Domoticz.Debug("onStop called")
@@ -100,14 +96,10 @@ class BasePlugin:
         sensors = self.read_sensors()
         
         for sensor in sensors:
-            Domoticz.Debug("======= Sensor =========")
-            Domoticz.Debug(str(sensor))
-            Domoticz.Debug("======= Data =========")
             sensor_data = sensors[sensor]
-            Domoticz.Debug(str(sensor_data))
-            Domoticz.Debug("======= Status =========")
+
             sensor_triggered = get_sensor_triggered(sensor_data)
-            Domoticz.Debug(str(sensor_triggered))
+
             if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)
             elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
@@ -164,8 +156,6 @@ class BasePlugin:
         json = parse_to_json(data)
 
         for sensor in json["senrows"]:
-            Domoticz.Debug("====== Sensor ======")
-            Domoticz.Debug(str(sensor))
             sensors[sensor["id"]] = sensor
 
         return sensors
@@ -253,10 +243,8 @@ def get_sensor_triggered(sensor):
     if sensor is not None:
         Domoticz.Debug("Device: " + sensor["name"] + " status = " + sensor["status"] )
         if sensor['status'].upper() == "DOOR OPEN":
-            # Return True when door is open or IR is triggered (todo)
             return True
         elif sensor['status'].upper() == "DOOR CLOSE":
-            # Return False when door is closed or IR is not triggered (todo)
             return False
     else:
         return None
@@ -286,6 +274,6 @@ def UpdateDevice(Unit, nValue, sValue):
     if (Unit in Devices):
         if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue):
             Devices[Unit].Update(nValue=nValue, sValue=str(sValue))
-            Domoticz.Debug("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
+            Domoticz.Log("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
     return
 
