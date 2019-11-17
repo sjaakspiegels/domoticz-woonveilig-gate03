@@ -241,6 +241,8 @@ def DumpConfigToLog():
     return
 
 def get_sensor_triggered(sensor):
+    Domoticz.Debug("======= sensor trigger?? =======")
+    Domoticz.Debug(str(sensor))
     if sensor is not None:
         Domoticz.Debug("Device: " + sensor["name"] + " status = " + sensor["status"] )
         if sensor['status'].upper() == "DOOR OPEN":
