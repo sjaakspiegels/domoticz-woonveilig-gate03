@@ -114,6 +114,8 @@ class BasePlugin:
             DomoState = 10
         elif alarm_state == "ARM":
             DomoState = 20
+        elif alarm_state == "FULL ARM":
+            DomoState = 20
 
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
 
