@@ -51,7 +51,8 @@ class BasePlugin:
             Domoticz.Debugging(1)        
             Domoticz.Log("Debugging ON")
             DumpConfigToLog()
-               
+
+        self._authorization = base64.b64encode("{0}:{1}".format(Parameters["Username"], Parameters["Password"]).encode()).decode("ascii")
         self.connect_to_adaptor()
         sensors = self.read_sensors()
                 
