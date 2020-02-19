@@ -147,10 +147,10 @@ class BasePlugin:
 
             if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)
-                json_msg["DOORSENSOR" + sensor_data[self.UNIT_KEY]] = "OPEN" if sensor_triggered == True else "CLOSED"
+                json_msg["DOORSENSOR" + str(sensor_data[self.UNIT_KEY])] = "OPEN" if sensor_triggered == True else "CLOSED"
             elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)        
-                json_msg["IRSENSOR" + sensor_data[self.UNIT_KEY]] = "ON" if sensor_triggered == True else "OFF"
+                json_msg["IRSENSOR" + str(sensor_data[self.UNIT_KEY])] = "ON" if sensor_triggered == True else "OFF"
     
         panel_condition = self.read_panel_condition()
         alarm_state = get_panel_state(panel_condition)
