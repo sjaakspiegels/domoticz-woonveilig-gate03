@@ -83,7 +83,8 @@ class BasePlugin:
                 self.mqttClient = mqtt.Client()
                 self.mqttClient.on_connect = onMQTTConnect
                 self.mqttClient.username_pw_set(username=self.mqttUsername, password=self.mqttPassword)
-                self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60)   
+                self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60) 
+                self.mqttClient.loop_start()  
                 self.mqttEnabled = True
             except:
                 self.mqttEnabled = False
