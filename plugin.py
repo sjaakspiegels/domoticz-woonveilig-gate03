@@ -15,6 +15,13 @@
         <param field="Username" label="Username" width="150px" required="true" default=""/>
         <param field="Password" label="Password" width="150px" required="true" default="" password="true"/>
         <param field="Port" label="Port (default = 80)" width="150px" required="true" default=""/>
+
+        <param field="Mode1" label="MQTT Server" width="200px" required="true" default=""/>
+        <param field="Mode2" label="MQTT Port" width="150px" required="true" default="1883"/>
+        <param field="Mode3" label="MQTT Username" width="150px" required="true" default=""/>
+        <param field="Mode4" label="MQTT Password" width="150px" required="true" default="" password="true"/>
+        <param field="Mode5" label="MQTT State Topic" width="150px" required="true" default=""/>
+
         <param field="Mode6" label="Debug" width="75px">
             <options>
                 <option label="True" value="Debug" default="true"/>
@@ -29,6 +36,8 @@ import Domoticz
 import http.client
 import base64
 import json
+import paho.mqtt.client as mqtt
+from datetime import datetime
 
 class BasePlugin:
     TYPES_IR = ["IR","IR Sensor"]
@@ -38,7 +47,14 @@ class BasePlugin:
     SENSOR_URL = "/action/deviceListGet" 
     TYPE_KEY = "type_f"
     UNIT_KEY = "zone"
- 
+    
+    mqttClient = None
+    mqttServeraddress = "localhost"
+    mqttServerport = 1883
+    mqttUsername = ""
+    mqttPassword = ""
+    mqttStatetopic = ""
+    
     _authorization = ""
     connection = None
 
@@ -54,6 +70,19 @@ class BasePlugin:
 
         self._authorization = base64.b64encode("{0}:{1}".format(Parameters["Username"], Parameters["Password"]).encode()).decode("ascii")
         self.connect_to_adaptor()
+
+        self.mqttServeraddress = Parameters["Mode1"].strip()
+        self.mqttServerport = Parameters["Mode2"].strip()
+        self.mqttUsername = Parameters["Mode3"].strip()
+        self.mqttPassword = Parameters["Mode4"].strip()
+        self.mqttStatetopic = Parameters["Mode5"].strip()
+
+        self.mqttClient = mqtt.Client()
+        self.mqttClient.on_connect = onMQTTConnect
+        self.mqttClient.username_pw_set(username=self.mqttUsername, password=self.mqttPassword)
+        self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60)        
+        self.mqttClient.loop_start()
+
         sensors = self.read_sensors()
                 
         #Add new devices
@@ -74,9 +103,17 @@ class BasePlugin:
     def onStop(self):
         Domoticz.Debug("onStop called")
         self.connection.close()
+        self.mqttClient.unsubscribe(self.mqttStatetopic)
+        self.mqttClient.disconnect()
 
     def onConnect(self, Connection, Status, Description):
         Domoticz.Debug("onConnect called")
+
+    def onMQTTConnect(self, client, userdata, flags, rc):
+        Domoticz.Debug("onMQTTConnect called")
+        Domoticz.Debug("Connected to " + self.mqttServeraddress + " with result code {}".format(rc))
+        self.mqttClient.subscribe("tele/" + self.mqttStatetopic + "/#",1)
+        self.mqttClient.subscribe("stat/" + self.mqttStatetopic + "/#",1)
 
     def onMessage(self, Connection, Data):
         Domoticz.Debug("onMessage called")
@@ -95,6 +132,9 @@ class BasePlugin:
  
         sensors = self.read_sensors()
         
+        dateTimeObj = datetime.now()
+        json_msg = json.loads("")
+        json_msg["Time"] = str(dateTimeObj)
         for sensor in sensors:
             sensor_data = sensors[sensor]
 
@@ -102,22 +142,29 @@ class BasePlugin:
 
             if (sensor_data[self.TYPE_KEY] in self.TYPES_DOORCONTACTS): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)
+                json_msg["DOORSENSOR" + str(self.UNIT_KEY)] = "OPEN" if sensor_triggered == True else "CLOSED"
             elif (sensor_data[self.TYPE_KEY] in self.TYPES_IR): 
                 UpdateDevice(int(sensor_data[self.UNIT_KEY]), nValue = 1 if sensor_triggered == True else 0, sValue = True if sensor_triggered == True else False)        
+                json_msg["IRSENSOR" + str(self.UNIT_KEY)] = "ON" if sensor_triggered == True else "OFF"
     
         panel_condition = self.read_panel_condition()
         alarm_state = get_panel_state(panel_condition)
         
         if alarm_state == "DISARM":
             DomoState = 0
+            json_msg["PANEL"] = "DISARM"
         elif alarm_state == "HOME":
             DomoState = 10
+            json_msg["PANEL"] = "HOME"
         elif alarm_state == "ARM":
             DomoState = 20
+            json_msg["PANEL"] = "ARM"
         elif alarm_state == "FULL ARM":
             DomoState = 20
+            json_msg["PANEL"] = "FULL ARM"
 
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
+        self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json_msg, qos=1)
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
@@ -212,6 +259,10 @@ def onHeartbeat():
     global _plugin
     _plugin.onHeartbeat()
 
+def onMQTTConnect(client, userdata, flags, rc):
+    global _plugin
+    _plugin.onMQTTConnect(client, userdata, flags, rc)
+
     # Generic helper functions
 def DumpConfigToLog():
     for x in Parameters:
@@ -246,7 +297,6 @@ def get_panel_state(panel):
 
 def parse_to_json(sensor_data):
     import json
-    import re
     sensor_data = sensor_data.replace("/*-secure-","")
     sensor_data = sensor_data.replace("*/","")
     sensor_data = sensor_data.replace('{	senrows : [','{"senrows":[')
