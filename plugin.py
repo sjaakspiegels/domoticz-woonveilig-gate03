@@ -54,7 +54,8 @@ class BasePlugin:
     mqttUsername = ""
     mqttPassword = ""
     mqttStatetopic = ""
-    
+    mqttEnabled = False
+
     _authorization = ""
     connection = None
 
@@ -77,11 +78,16 @@ class BasePlugin:
         self.mqttPassword = Parameters["Mode4"].strip()
         self.mqttStatetopic = Parameters["Mode5"].strip()
 
-        self.mqttClient = mqtt.Client()
-        self.mqttClient.on_connect = onMQTTConnect
-        self.mqttClient.username_pw_set(username=self.mqttUsername, password=self.mqttPassword)
-        self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60)        
-        self.mqttClient.loop_start()
+        if (self.mqttServeraddress != ""):
+            try:
+                self.mqttClient = mqtt.Client()
+                self.mqttClient.on_connect = onMQTTConnect
+                self.mqttClient.username_pw_set(username=self.mqttUsername, password=self.mqttPassword)
+                self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60)   
+                self.mqttEnabled = True
+            except:
+                self.mqttEnabled = False
+     
 
         sensors = self.read_sensors()
                 
@@ -103,8 +109,8 @@ class BasePlugin:
     def onStop(self):
         Domoticz.Debug("onStop called")
         self.connection.close()
-        self.mqttClient.unsubscribe(self.mqttStatetopic)
-        self.mqttClient.disconnect()
+        if self.mqttEnabled:
+            self.mqttClient.disconnect()
 
     def onConnect(self, Connection, Status, Description):
         Domoticz.Debug("onConnect called")
@@ -112,8 +118,6 @@ class BasePlugin:
     def onMQTTConnect(self, client, userdata, flags, rc):
         Domoticz.Debug("onMQTTConnect called")
         Domoticz.Debug("Connected to " + self.mqttServeraddress + " with result code {}".format(rc))
-        self.mqttClient.subscribe("tele/" + self.mqttStatetopic + "/#",1)
-        self.mqttClient.subscribe("stat/" + self.mqttStatetopic + "/#",1)
 
     def onMessage(self, Connection, Data):
         Domoticz.Debug("onMessage called")
@@ -164,7 +168,8 @@ class BasePlugin:
             json_msg["PANEL"] = "FULL ARM"
 
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
-        self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json_msg, qos=1)
+        if self.mqttEnabled:
+            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json_msg, qos=1)
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
