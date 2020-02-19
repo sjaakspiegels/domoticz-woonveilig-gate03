@@ -137,8 +137,9 @@ class BasePlugin:
         sensors = self.read_sensors()
         
         dateTimeObj = datetime.now()
-        json_msg = json.loads("")
+        json_msg = {}
         json_msg["Time"] = str(dateTimeObj)
+
         for sensor in sensors:
             sensor_data = sensors[sensor]
 
@@ -169,7 +170,8 @@ class BasePlugin:
 
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
         if self.mqttEnabled:
-            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json_msg, qos=1)
+            Domoticz.Debug("MQTT message: " + str(json.dumps(data)))
+            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(data), qos=1)
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
