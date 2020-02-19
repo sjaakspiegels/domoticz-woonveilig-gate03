@@ -170,8 +170,8 @@ class BasePlugin:
 
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
         if self.mqttEnabled:
-            Domoticz.Debug("MQTT message: " + str(json.dumps(data)))
-            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(data), qos=1)
+            Domoticz.Debug("MQTT message: " + str(json.dumps(json_msg)))
+            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(json_msg), qos=1)
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
