@@ -172,7 +172,13 @@ class BasePlugin:
         UpdateDevice(Unit=99, nValue = DomoState, sValue= str(DomoState))
         if self.mqttEnabled:
             Domoticz.Debug("MQTT message: " + str(json.dumps(json_msg)))
-            self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(json_msg), qos=1)
+            for i in range(3):
+                try:
+                    self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(json_msg), qos=1)
+                    break
+                except:
+                    self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60) 
+                    self.mqttClient.loop_start()  
 
     def connect_to_adaptor(self):
         Domoticz.Debug("Connecting to GATE")
@@ -187,15 +193,15 @@ class BasePlugin:
                 self.connection.request("GET", self.SENSOR_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
             except:
-                Domoticz.Log("ERROR --> Connection problems check URL and port")
-                return
+                Domoticz.Error("Connection problems check URL and port")
+                self.connect_to_adaptor()
             
             if(r1.status == 200):
                 Domoticz.Debug("Valid connection data returned")
                 break
         else:
-            Domoticz.Log("ERROR --> Connection Error : " +str(r1.status) +" Reason: " + r1.reason )
-            Domoticz.Log("ERROR --> Please check username and/or password")
+            Domoticz.Error("Connection Error : " +str(r1.status) +" Reason: " + r1.reason )
+            Domoticz.Error("Please check username and/or password")
             return      
 
         data = r1.read().decode("utf-8", "ignore")
@@ -216,15 +222,15 @@ class BasePlugin:
                 self.connection.request("GET", self.PANEL_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
             except:
-                Domoticz.Log("ERROR --> Connection problems check URL and port")
+                Domoticz.Error("Connection problems check URL and port")
                 return
             
             if(r1.status == 200):
                 Domoticz.Debug("Valid connection data returned")
                 break
         else:
-            Domoticz.Log("ERROR --> Connection Error : " +str(r1.status) +" Reason: " + r1.reason )
-            Domoticz.Log("ERROR --> Please check username and/or password")
+            Domoticz.Error("Connection Error : " +str(r1.status) +" Reason: " + r1.reason )
+            Domoticz.Error("Please check username and/or password")
             return      
 
         data = r1.read().decode("utf-8", "ignore")
