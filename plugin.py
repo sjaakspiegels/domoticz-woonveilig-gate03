@@ -177,6 +177,7 @@ class BasePlugin:
                     self.mqttClient.publish("tele/" + self.mqttStatetopic + "/SENSOR", payload = json.dumps(json_msg), qos=1)
                     break
                 except:
+                    Domoticz.Error("Connection problems MQTT check URL and port")
                     self.mqttClient.connect(self.mqttServeraddress, int(self.mqttServerport), 60) 
                     self.mqttClient.loop_start()  
 
@@ -193,7 +194,7 @@ class BasePlugin:
                 self.connection.request("GET", self.SENSOR_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
             except:
-                Domoticz.Error("Connection problems check URL and port")
+                Domoticz.Error("Connection problems Sensors check URL and port")
                 self.connect_to_adaptor()
             
             if(r1.status == 200):
@@ -222,8 +223,8 @@ class BasePlugin:
                 self.connection.request("GET", self.PANEL_URL, headers={'Authorization': "Basic " + self._authorization})
                 r1 = self.connection.getresponse()
             except:
-                Domoticz.Error("Connection problems check URL and port")
-                return
+                c
+                self.connect_to_adaptor()
             
             if(r1.status == 200):
                 Domoticz.Debug("Valid connection data returned")
